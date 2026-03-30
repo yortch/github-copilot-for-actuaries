@@ -85,6 +85,8 @@ When activated, you'll see `(.venv)` at the beginning of your terminal prompt. T
 
 ### 5. Install Dependencies and Generate Data
 
+**What is pip?** `pip` is Python's built-in package manager — it downloads and installs libraries from the internet, similar to how you might install an add-in in Excel. It is included automatically when you install Python 3.4 or higher, so no separate installation is needed.
+
 With your venv activated, install the project's required packages and generate the sample datasets:
 
 ```bash
@@ -135,7 +137,7 @@ python data/generate_sample_data.py
 |---|------|--------------|-----------------|------|
 | A | [Instruction Files in Action](#demo-a-instruction-files-in-action-10-min) | Auto-loaded actuarial context | Workspace & file-scoped instructions | 10 min |
 | B | [Skills — Guided Workflows](#demo-b-skills--guided-workflows-15-min) | Multi-step actuarial procedures | On-demand skill playbooks | 15 min |
-| C | [Custom Agents — Actuarial Personas](#demo-c-custom-agents--actuarial-personas-15-min) | Specialized AI team members | `@agent` invocation in Chat | 15 min |
+| C | [Custom Agents — Actuarial Personas](#demo-c-custom-agents--actuarial-personas-15-min) | Specialized AI team members | Agent dropdown selection in Chat | 15 min |
 | D | [Combining All Three](#demo-d-combining-all-three-10-min) | Full reserving → pricing → QA workflow | Instructions + Skills + Agents together | 10 min |
 
 ---
@@ -250,11 +252,11 @@ On-demand multi-step workflows Copilot can follow:
 - **vba-to-python-migration** — Structured migration preserving exact business logic
 
 ### Custom Agents (`.github/agents/`)
-Specialized personas you can invoke with `@agent-name` in Copilot Chat:
-- **@reserving-actuary** — Triangle analysis, IBNR, BF/CL comparisons
-- **@pricing-actuary** — GLM modeling, rate indications, filing exhibits
-- **@data-quality-reviewer** — Validation checks, outlier detection, audit prep
-- **@legacy-code-migrator** — VBA/SAS/Excel to Python conversion
+Specialized personas you can select from the **Agent dropdown** in Copilot Chat (VS Code 1.110+):
+- **reserving-actuary** — Triangle analysis, IBNR, BF/CL comparisons
+- **pricing-actuary** — GLM modeling, rate indications, filing exhibits
+- **data-quality-reviewer** — Validation checks, outlier detection, audit prep
+- **legacy-code-migrator** — VBA/SAS/Excel to Python conversion
 
 ---
 
@@ -270,7 +272,7 @@ Show how Copilot automatically picks up actuarial context from instruction files
 |------|-----------|--------------|
 | 1 | Open `demo1_loss_triangle/chain_ladder.py` and ask Copilot Chat: **"Add a tail factor to this analysis"** | Copilot references "tail factor" terminology and applies a CDF adjustment — because `reserving.instructions.md` loaded automatically |
 | 2 | Open `demo5_vba_migration/premium_calc.vba` and ask: **"Explain this code"** | The `applyTo: "**/*.vba"` pattern on `vba-migration.instructions.md` auto-activates — Copilot explains using VBA-to-Python mapping patterns from the instruction file |
-| 3 | Create a new empty `.py` file and type a comment: `# Validate that paid losses do not exceed incurred losses` then let Copilot autocomplete | Copilot generates a validation function consistent with the rules in `data-validation.instructions.md` |
+| 3 | Open Copilot Chat in **Agent mode** and enter the prompt: **"Create a Python function that validates paid losses do not exceed incurred losses"** | Copilot generates a validation function consistent with the rules in `data-validation.instructions.md` — instruction files are loaded in Chat/Agent mode, not inline autocomplete |
 | 4 | Open `copilot-instructions.md` and walk through the contents | Explain that this file gives Copilot workspace-wide context — it knows the LOBs, states, and coding conventions for every interaction |
 
 **Key talking point:** *"Instruction files are like onboarding documents for Copilot. Once they're in your repo, every team member gets the same domain context automatically."*
@@ -294,11 +296,11 @@ Show how custom agents act as specialized AI team members with focused expertise
 
 | Step | What to Do | What to Show |
 |------|-----------|--------------|
-| 1 | In Copilot Chat, type: **@reserving-actuary Analyze the loss triangle in data/loss_triangle.csv and estimate IBNR for each accident year** | The reserving actuary agent runs a full reserve analysis — chain ladder + BF comparison, factor selection table, IBNR summary, and visualization |
-| 2 | Follow up with: **@reserving-actuary The 2023 accident year link ratio looks high — should we exclude it?** | Shows the agent's domain reasoning — it will discuss factor selection, volatility in immature years, and recommend an approach |
-| 3 | Switch agents: **@pricing-actuary Build a frequency-severity GLM for Personal Auto using the policy and claim data** | The pricing actuary runs the GLM workflow — Poisson frequency, Gamma severity, relativities table, and model diagnostics |
-| 4 | Try: **@data-quality-reviewer Run validation checks on the claim and policy data before I use it for reserving** | The data quality agent runs structural and statistical checks, returning a severity-classified issue table with remediation recommendations |
-| 5 | Try: **@legacy-code-migrator Convert premium_calc.vba to Python and verify the output matches** | The migration agent explains the VBA, writes Python, and produces unit tests — all in one interaction |
+| 1 | Open Copilot Chat, select **reserving-actuary** from the Agent dropdown, then send: **Analyze the loss triangle in data/loss_triangle.csv and estimate IBNR for each accident year** | The reserving actuary agent runs a full reserve analysis — chain ladder + BF comparison, factor selection table, IBNR summary, and visualization |
+| 2 | Follow up (same agent selected): **The 2023 accident year link ratio looks high — should we exclude it?** | Shows the agent's domain reasoning — it will discuss factor selection, volatility in immature years, and recommend an approach |
+| 3 | Switch agents: select **pricing-actuary** from the Agent dropdown, then send: **Build a frequency-severity GLM for Personal Auto using the policy and claim data** | The pricing actuary runs the GLM workflow — Poisson frequency, Gamma severity, relativities table, and model diagnostics |
+| 4 | Select **data-quality-reviewer** from the Agent dropdown, then send: **Run validation checks on the claim and policy data before I use it for reserving** | The data quality agent runs structural and statistical checks, returning a severity-classified issue table with remediation recommendations |
+| 5 | Select **legacy-code-migrator** from the Agent dropdown, then send: **Convert premium_calc.vba to Python and verify the output matches** | The migration agent explains the VBA, writes Python, and produces unit tests — all in one interaction |
 
 **Key talking point:** *"Custom agents are like having a junior analyst who already knows your team's methods — you tell them what to do, and they follow your playbook."*
 
@@ -308,9 +310,9 @@ The real power is when instructions, skills, and agents work together. Run this 
 
 | Step | What to Do | What to Show |
 |------|-----------|--------------|
-| 1 | Ask: **@reserving-actuary Perform a full reserve analysis for Personal Auto and present results suitable for a reserve committee** | The agent uses its persona constraints + the reserving instruction file's terminology + the loss-triangle-analysis skill's workflow to produce committee-ready output |
-| 2 | Then ask: **@pricing-actuary Using the IBNR estimates from the reserve analysis, calculate the indicated rate change for Personal Auto** | Shows agents building on each other's work — the pricing actuary references the reserving output and follows the rate-indication skill workflow |
-| 3 | Finally: **@data-quality-reviewer Review the data used in the reserve and pricing analyses — are there any quality issues I should disclose in the filing?** | The data quality agent audits the underlying data with regulatory awareness from `data-validation.instructions.md` — ASOP #23 compliance |
+| 1 | Select **reserving-actuary** from the Agent dropdown and ask: **Perform a full reserve analysis for Personal Auto and present results suitable for a reserve committee** | The agent uses its persona constraints + the reserving instruction file's terminology + the loss-triangle-analysis skill's workflow to produce committee-ready output |
+| 2 | Select **pricing-actuary** from the Agent dropdown and ask: **Using the IBNR estimates from the reserve analysis, calculate the indicated rate change for Personal Auto** | Shows agents building on each other's work — the pricing actuary references the reserving output and follows the rate-indication skill workflow |
+| 3 | Select **data-quality-reviewer** from the Agent dropdown and ask: **Review the data used in the reserve and pricing analyses — are there any quality issues I should disclose in the filing?** | The data quality agent audits the underlying data with regulatory awareness from `data-validation.instructions.md` — ASOP #23 compliance |
 
 **Key talking point:** *"This is a full actuarial workflow — reserving, pricing, and data quality review — with Copilot acting as three different specialists, all following your team's standards."*
 
